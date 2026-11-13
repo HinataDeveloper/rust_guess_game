@@ -1,2 +1,3 @@
-# rust_guess_game
+# Rust Guess Game
+
 Creating guess game by Rust programming language
