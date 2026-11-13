@@ -26,6 +26,7 @@ dbg_macro = "warn"
 clone_on_ref_ptr = "warn"
 
 [dependencies]
+chrono = "0.4.45"
 rand = "0.10.3"
 
 [[bin]]
