@@ -26,50 +26,69 @@
 // ssl: OpenSSL 3.6.3 9 Jun 2026
 // os: Fedora 45.0.0 [64-bit]
 
-use guess_game::{check, obtain_number, secret_number, validate, Validation};
+use guess_game::{Counter, GameResult, Validation};
+use guess_game::{check, obtain_number, secret_number, validate};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("\n");
 
-    let mut win = false;
+    let mut game_resultant = GameResult::Loss;
+    let mut step = Counter::new(0);
     let secret_number = secret_number();
 
     // ---------------------------------------
 
-    for item in 0..10 {
-        let input_number = obtain_number(item + 1)?;
+    loop {
+        step.plus();
+        if step.check(11) {
+            break;
+        }
+        let input_number = obtain_number(step.status() as usize)?;
 
         // ---------------------------------------
 
         let result = validate(&input_number);
         match result {
-            Validation::LessThanFive => println!("Invalid Number: Less than five digit ..."),
-            Validation::MoreThanFive => println!("Invalid Number: More than five digit ..."),
-            Validation::ZeroFirst => println!("Invalid Number: First number is zero ..."),
-            Validation::Repetitive => println!("Invalid Number: Repetitive digits ..."),
+            Validation::LessThanFive => {
+                println!(" --->>> Invalid Number: Less than five digit ...");
+                step.minus();
+                continue;
+            }
+            Validation::MoreThanFive => {
+                println!(" --->>> Invalid Number: More than five digit ...");
+                step.minus();
+                continue;
+            }
+            Validation::ZeroFirst => {
+                println!(" --->>> Invalid Number: First number is zero ...");
+                step.minus();
+                continue;
+            }
+            Validation::Repetitive => {
+                println!(" --->>> Invalid Number: Repetitive digits ...");
+                step.minus();
+                continue;
+            }
             Validation::Valid => (),
         }
 
         // ---------------------------------------
 
         let check = check(&secret_number, &input_number);
-        println!(" -> {item} - In Place:{}, Exist:{}\n", check.0, check.1);
+        println!(" -> {step} - In Place:{}, Exist:{}\n", check.0, check.1);
         if check.0 == 5 && check.1 == 5 {
             println!("Congratulation, You Win ...");
-            win = true;
+            game_resultant = GameResult::Win;
             break;
         }
     }
 
-    if !win {
-        println!(
-            "You Loss the game...\n
-        That’s fine; you can try again whenever you like ..."
-        );
+    if matches!(game_resultant, GameResult::Loss) {
+        println!(" > You Loss the game...");
+        println!(" > That’s fine; you can try again whenever you like ...");
+        println!(" > The number was: {secret_number:?}");
     }
 
     println!("\n The End ...\n");
     Ok(())
 }
-
-//-------------------------

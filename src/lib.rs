@@ -13,7 +13,7 @@
 // host: x86_64-unknown-linux-gnu
 // release: 1.102.0-nightly
 // LLVM version: 23.1.5
- 
+
 // cargo 1.102.0-nightly (c07ac2c4d 2026-11-06)
 // release: 1.102.0-nightly
 // commit-hash: c07ac2c4d12237effc4b94f4543769b421790045
@@ -25,7 +25,11 @@
 // os: Fedora 45.0.0 [64-bit]
 
 use rand::{RngExt, seq::SliceRandom};
-use std::{cmp::Ordering, io::Write};
+use std::{
+    cmp::Ordering,
+    fmt::{Debug, Display},
+    io::Write,
+};
 
 #[allow(dead_code)]
 fn logger(msg: &str) {
@@ -174,4 +178,63 @@ pub fn check(secret_number: &[u32; 5], input_number: &[u32; 5]) -> (u32, u32) {
     }
 
     (in_place, exist)
+}
+
+pub struct Counter {
+    counter: u32,
+}
+
+impl Counter {
+    #[must_use]
+    pub const fn new(start: u32) -> Self {
+        Self { counter: start }
+    }
+
+    #[must_use]
+    pub const fn status(&self) -> u32 {
+        self.counter
+    }
+
+    pub const fn plus(&mut self) -> u32 {
+        self.counter += 1;
+        self.counter
+    }
+
+    pub const fn minus(&mut self) -> u32 {
+        self.counter -= 1;
+        self.counter
+    }
+
+    #[must_use]
+    pub const fn check(&mut self, with: u32) -> bool {
+        self.counter == with
+    }
+
+    pub const fn reset(&mut self) {
+        self.counter = 0;
+    }
+
+    pub const fn reset_by(&mut self, by: u32) {
+        self.counter = by;
+    }
+}
+
+impl Display for Counter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.counter)
+    }
+}
+
+impl Debug for Counter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Counter")
+            .field("counter", &self.counter)
+            .finish()
+    }
+}
+
+#[derive(Debug)]
+pub enum GameResult {
+    Loss,
+    Win,
 }
