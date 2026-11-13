@@ -26,14 +26,14 @@
 // ssl: OpenSSL 3.6.3 9 Jun 2026
 // os: Fedora 45.0.0 [64-bit]
 
-use std::cmp::Ordering;
+use std::{cmp::Ordering, fs::read, io::Write};
 
 use rand::{RngExt, seq::SliceRandom};
 
 fn main() {
     println!("\n");
 
-    for index in 0..1000000 {
+    for index in 0..1_000_000 {
         let array_number = secret_number();
         let result = validate(&array_number);
         println!("{index} {result:?}");
@@ -95,4 +95,53 @@ fn validate(input_number: &[u32; 5]) -> Validation {
     }
 
     Validation::Valid
+}
+
+fn convert_number_to_array(mut number: u32, length: u32) -> [u32; 5] {
+    let mut array_number: [u32; 5] = [0_u32; 5];
+
+    for (counter, item) in (length..=1).enumerate() {
+        let z: u32 = 10_u32.pow(item - 1);
+        let unit = number / z;
+        array_number[counter] = unit;
+        number -= unit * z;
+    }
+
+    array_number
+}
+
+fn read_input_str_number() -> Result<String, std::io::Error> {
+    print!("input five digit number: ");
+    let () = match std::io::stdout().flush() {
+        Ok(()) => (),
+        Err(err) => return Err(err),
+    };
+
+    let mut input_data = String::new();
+    let () = match std::io::stdin().read_line(&mut input_data) {
+        Ok(_) => (),
+        Err(err) => return Err(err),
+    };
+
+    Ok(input_data.trim().to_string())
+}
+
+#[allow(dead_code)]
+fn obtain_number() -> Result<[u32; 5], Box<dyn std::error::Error>> {
+    let input_data_result = read_input_str_number();
+    let input_data = match input_data_result {
+        Ok(data) => data,
+        Err(err) => return Err(Box::new(err)),
+    };
+
+    let length_result = u32::try_from(input_data.len());
+    let length = match length_result {
+        Ok(len) => len,
+        Err(err) => return Err(Box::new(err)),
+    };
+
+    let number: u32 = input_data.parse().expect("Error in parse input number");
+    let array_number = convert_number_to_array(number, length);
+
+    Ok(array_number)
 }
