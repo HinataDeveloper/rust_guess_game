@@ -32,25 +32,42 @@ use std::{cmp::Ordering, io::Write};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("\n");
 
-    // ---------------------------------------
-
-    let result = obtain_number()?;
-    println!("{result:#?}");
+    let mut win = false;
+    let secret_number = secret_number();
 
     // ---------------------------------------
 
-    // for index in 0..1_000_000 {
-    //     let array_number = secret_number();
-    //     let result = validate(&array_number);
-    //     println!("{index} {result:?}");
-    //     match result {
-    //         Validation::LessThanFive
-    //         | Validation::MoreThanFive
-    //         | Validation::ZeroFirst
-    //         | Validation::Repetitive => break,
-    //         Validation::Valid => (),
-    //     }
-    // }
+    for item in 0..10 {
+        let input_number = obtain_number(item + 1)?;
+
+        // ---------------------------------------
+
+        let result = validate(&input_number);
+        match result {
+            Validation::LessThanFive => println!("Invalid Number: Less than five digit ..."),
+            Validation::MoreThanFive => println!("Invalid Number: More than five digit ..."),
+            Validation::ZeroFirst => println!("Invalid Number: First number is zero ..."),
+            Validation::Repetitive => println!("Invalid Number: Repetitive digits ..."),
+            Validation::Valid => (),
+        }
+
+        // ---------------------------------------
+
+        let check = check(&secret_number, &input_number);
+        println!(" -> {item} - In Place:{}, Exist:{}\n", check.0, check.1);
+        if check.0 == 5 && check.1 == 5 {
+            println!("Congratulation, You Win ...");
+            win = true;
+            break;
+        }
+    }
+
+    if !win {
+        println!(
+            "You Loss the game...\n
+        That’s fine; you can try again whenever you like ..."
+        );
+    }
 
     println!("\n The End ...\n");
     Ok(())
@@ -74,6 +91,31 @@ enum Validation {
     MoreThanFive,
     LessThanFive,
     Valid,
+}
+
+//-------------------------
+
+#[allow(dead_code)]
+#[derive(Debug)]
+enum Exist {
+    Zero,
+    One,
+    Two,
+    Three,
+    Four,
+    Five,
+}
+
+//-------------------------
+#[allow(dead_code)]
+#[derive(Debug)]
+enum InPlace {
+    Zero(Exist),
+    One(Exist),
+    Two(Exist),
+    Three(Exist),
+    Four(Exist),
+    Five(Exist),
 }
 
 //-------------------------
@@ -140,8 +182,8 @@ fn convert_number_to_array(mut number: u32, length: u32) -> [u32; 5] {
 
 //-------------------------
 
-fn read_input_str_number() -> Result<String, std::io::Error> {
-    print!("input five digit number: ");
+fn read_input_str_number(time: usize) -> Result<String, std::io::Error> {
+    print!(" => {time} - input five digit number: ");
     std::io::stdout().flush()?;
     let mut input_data = String::new();
     std::io::stdin().read_line(&mut input_data)?;
@@ -151,10 +193,34 @@ fn read_input_str_number() -> Result<String, std::io::Error> {
 //-------------------------
 
 #[allow(dead_code)]
-fn obtain_number() -> Result<[u32; 5], Box<dyn std::error::Error>> {
-    let input_data = read_input_str_number()?;
+fn obtain_number(time: usize) -> Result<[u32; 5], Box<dyn std::error::Error>> {
+    let input_data = read_input_str_number(time)?;
     let length = u32::try_from(input_data.len())?;
     let number = input_data.parse::<u32>()?;
     let array_number = convert_number_to_array(number, length);
     Ok(array_number)
+}
+
+fn check(secret_number: &[u32; 5], input_number: &[u32; 5]) -> (u32, u32) {
+    let mut in_place: u32 = 0;
+    let mut exist: u32 = 0;
+
+    for index in 0..5 {
+        if let Some(sec_num) = secret_number.get(index)
+            && let Some(inp_num) = input_number.get(index)
+            && sec_num == inp_num
+        {
+            in_place += 1;
+        }
+    }
+
+    for item_inp in input_number {
+        for item_sec in secret_number {
+            if item_inp == item_sec {
+                exist += 1;
+            }
+        }
+    }
+
+    (in_place, exist)
 }
