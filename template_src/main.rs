@@ -4,7 +4,7 @@
 
 // Project: Crate Guess Game
 // Goal: ...
-// Dependency: Depend on `rand` crate
+// Dependency: Dependency: Depend on `rand` and `chrono` crate
 
 // Kernel Version: 7.3.3-300.fc45.x86_64
 
