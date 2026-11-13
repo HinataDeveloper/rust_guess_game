@@ -4,7 +4,7 @@
 
 // Project: Crate Guess Game
 // Goal: ...
-// Dependency: Depend on `rand` crate
+// Dependency: Depend on `rand` and `chrono` crate
 
 // Kernel Version: 7.3.3-300.fc45.x86_64
 
@@ -29,25 +29,39 @@
 use rand::{RngExt, seq::SliceRandom};
 use std::{cmp::Ordering, io::Write};
 
-fn main() /* -> Result<(), Box<dyn std::error::Error>> */
-{
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("\n");
 
-    for index in 0..1_000_000 {
-        let array_number = secret_number();
-        let result = validate(&array_number);
-        println!("{index} {result:?}");
-        match result {
-            Validation::LessThanFive
-            | Validation::MoreThanFive
-            | Validation::ZeroFirst
-            | Validation::Repetitive => break,
-            Validation::Valid => (),
-        }
-    }
+    // ---------------------------------------
+
+    let result = obtain_number()?;
+    println!("{result:#?}");
+
+    // ---------------------------------------
+
+    // for index in 0..1_000_000 {
+    //     let array_number = secret_number();
+    //     let result = validate(&array_number);
+    //     println!("{index} {result:?}");
+    //     match result {
+    //         Validation::LessThanFive
+    //         | Validation::MoreThanFive
+    //         | Validation::ZeroFirst
+    //         | Validation::Repetitive => break,
+    //         Validation::Valid => (),
+    //     }
+    // }
 
     println!("\n The End ...\n");
-    // Ok(())
+    Ok(())
+}
+
+//-------------------------
+
+#[allow(dead_code)]
+fn logger(msg: &str) {
+    let now = chrono::offset::Local::now();
+    println!(" >>> Logger: {now:?} {msg} ");
 }
 
 //-------------------------
@@ -109,13 +123,16 @@ fn validate(input_number: &[u32; 5]) -> Validation {
 fn convert_number_to_array(mut number: u32, length: u32) -> [u32; 5] {
     let mut array_number: [u32; 5] = [0_u32; 5];
 
-    for (counter, item) in (length..=1).enumerate() {
+    // let mut counter: usize = 0;
+
+    for (counter, item) in (1..=length).rev().enumerate() {
         let z: u32 = 10_u32.pow(item - 1);
         let unit = number / z;
         if let Some(n) = array_number.get_mut(counter) {
             *n = unit;
         }
         number -= unit * z;
+        // counter += 1;
     }
 
     array_number
