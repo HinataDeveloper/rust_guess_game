@@ -1,5 +1,5 @@
 // lib.rs
-// Date: Fri Nov 13 2026
+// Date: Sat Nov 14 2026
 // Educational and Practice Rust Programming Language Code
 
 // Dependency: Dependency: Depend on `rand` and `chrono` crate
@@ -31,13 +31,15 @@ use std::{
     io::Write,
 };
 
+// -----------------------------------------------------------
+
 #[allow(dead_code)]
 fn logger(msg: &str) {
     let now = chrono::offset::Local::now();
     println!(" >>> Logger: {now:?} {msg} ");
 }
 
-//-------------------------
+// -----------------------------------------------------------
 
 #[derive(Debug)]
 pub enum Validation {
@@ -48,7 +50,7 @@ pub enum Validation {
     Valid,
 }
 
-//-------------------------
+// -----------------------------------------------------------
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -61,7 +63,8 @@ enum Exist {
     Five,
 }
 
-//-------------------------
+// -----------------------------------------------------------
+
 #[allow(dead_code)]
 #[derive(Debug)]
 enum InPlace {
@@ -73,7 +76,7 @@ enum InPlace {
     Five(Exist),
 }
 
-//-------------------------
+// -----------------------------------------------------------
 
 #[must_use]
 pub fn secret_number() -> [u32; 5] {
@@ -86,7 +89,7 @@ pub fn secret_number() -> [u32; 5] {
     secret
 }
 
-//-------------------------
+// -----------------------------------------------------------
 
 #[must_use]
 pub fn validate(input_number: &[u32; 5]) -> Validation {
@@ -115,7 +118,7 @@ pub fn validate(input_number: &[u32; 5]) -> Validation {
     Validation::Valid
 }
 
-//-------------------------
+// -----------------------------------------------------------
 
 #[must_use]
 fn convert_number_to_array(mut number: u32, length: u32) -> [u32; 5] {
@@ -133,18 +136,22 @@ fn convert_number_to_array(mut number: u32, length: u32) -> [u32; 5] {
     array_number
 }
 
-//-------------------------
+// -----------------------------------------------------------
 
 /// # Errors
-fn read_input_str_number(time: usize) -> Result<String, std::io::Error> {
+fn read_input_str_number(time: usize) -> Result<String, Box<dyn std::error::Error>> {
     print!(" => {time} - input five digit number: ");
     std::io::stdout().flush()?;
     let mut input_data = String::new();
     std::io::stdin().read_line(&mut input_data)?;
-    Ok(input_data.trim().to_string())
+    input_data = input_data.trim().to_string();
+    if input_data.len() != 5 {
+        return Err(Box::new(LengthError));
+    }
+    Ok(input_data)
 }
 
-//-------------------------
+// -----------------------------------------------------------
 
 /// # Errors
 pub fn obtain_number(time: usize) -> Result<[u32; 5], Box<dyn std::error::Error>> {
@@ -154,6 +161,8 @@ pub fn obtain_number(time: usize) -> Result<[u32; 5], Box<dyn std::error::Error>
     let array_number = convert_number_to_array(number, length);
     Ok(array_number)
 }
+
+// -----------------------------------------------------------
 
 #[must_use]
 pub fn check(secret_number: &[u32; 5], input_number: &[u32; 5]) -> (u32, u32) {
@@ -179,6 +188,8 @@ pub fn check(secret_number: &[u32; 5], input_number: &[u32; 5]) -> (u32, u32) {
 
     (in_place, exist)
 }
+
+// -----------------------------------------------------------
 
 pub struct Counter {
     counter: u32,
@@ -237,4 +248,22 @@ impl Debug for Counter {
 pub enum GameResult {
     Loss,
     Win,
+}
+
+// -----------------------------------------------------------
+
+struct LengthError;
+
+impl std::error::Error for LengthError {}
+
+impl Debug for LengthError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Length error")
+    }
+}
+
+impl Display for LengthError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Length error")
+    }
 }

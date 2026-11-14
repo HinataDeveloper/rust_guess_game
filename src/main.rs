@@ -1,5 +1,5 @@
 // main.rs
-// Date: Fri Nov 13 2026
+// Date: Sat Nov 14 2026
 // Educational and Practice Rust Programming Language Code
 
 // Project: Crate Guess Game
@@ -29,9 +29,11 @@
 use guess_game::{Counter, GameResult, Validation};
 use guess_game::{check, obtain_number, secret_number, validate};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() /*-> Result<(), Box<dyn std::error::Error>>*/
+{
     println!("\n");
 
+    let mut input_number: [u32; 5];
     let mut game_resultant = GameResult::Loss;
     let mut step = Counter::new(0);
     let secret_number = secret_number();
@@ -43,7 +45,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if step.check(11) {
             break;
         }
-        let input_number = obtain_number(step.status() as usize)?;
+        input_number = loop {
+            let input_number_result = obtain_number(step.status() as usize);
+            if let Ok(inp) = input_number_result {
+                break inp;
+            }
+            println!(" --->>> Invalid number. Try agian ...");
+        };
 
         // ---------------------------------------
 
@@ -90,5 +98,5 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     println!("\n The End ...\n");
-    Ok(())
+    // Ok(())
 }
